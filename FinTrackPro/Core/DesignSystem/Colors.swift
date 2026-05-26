@@ -27,4 +27,11 @@ extension Color {
             opacity: alpha
         )
     }
+
+    init?(hexString: String?) {
+        guard let raw = hexString else { return nil }
+        let stripped = raw.trimmingCharacters(in: CharacterSet(charactersIn: "#"))
+        guard stripped.count == 6, let value = UInt(stripped, radix: 16) else { return nil }
+        self.init(hex: value)
+    }
 }

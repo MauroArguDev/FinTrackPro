@@ -1,7 +1,20 @@
 import SwiftUI
 
 enum AppTab: Hashable {
-    case dashboard, transactions, add, budget, charts
+    case dashboard, transactions, budget, charts
+}
+
+private struct FABStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.91 : 1)
+            .animation(
+                reduceMotion ? .none : .spring(response: 0.25, dampingFraction: 0.55),
+                value: configuration.isPressed
+            )
+    }
 }
 
 struct ContentView: View {
@@ -26,34 +39,41 @@ struct ContentView: View {
     }
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            DashboardView()
-                .tag(AppTab.dashboard)
-                .tabItem { Label("Dashboard", systemImage: "house.fill") }
+        ZStack(alignment: .bottom) {
+            TabView(selection: $selectedTab) {
+                DashboardView(selectedTab: $selectedTab)
+                    .tag(AppTab.dashboard)
+                    .tabItem { Label("Home", systemImage: "house.fill") }
 
-            TransactionListView()
-                .tag(AppTab.transactions)
-                .tabItem { Label("Transactions", systemImage: "list.bullet.rectangle.fill") }
+                TransactionListView()
+                    .tag(AppTab.transactions)
+                    .tabItem { Label("Transactions", systemImage: "list.bullet.rectangle.fill") }
 
-            Color.clear
-                .tag(AppTab.add)
-                .tabItem { Label("Add", systemImage: "plus.circle.fill") }
+                BudgetView()
+                    .tag(AppTab.budget)
+                    .tabItem { Label("Budget", systemImage: "chart.bar.fill") }
 
-            BudgetView()
-                .tag(AppTab.budget)
-                .tabItem { Label("Budget", systemImage: "chart.bar.fill") }
-
-            ChartsView()
-                .tag(AppTab.charts)
-                .tabItem { Label("Charts", systemImage: "chart.pie.fill") }
-        }
-        .tint(FTColors.positive)
-        .preferredColorScheme(.dark)
-        .onChange(of: selectedTab) { _, newTab in
-            if newTab == .add {
-                selectedTab = .dashboard
-                showAddTransaction = true
+                ChartsView()
+                    .tag(AppTab.charts)
+                    .tabItem { Label("Charts", systemImage: "chart.pie.fill") }
             }
+            .tint(FTColors.positive)
+            .preferredColorScheme(.dark)
+
+            Button {
+                showAddTransaction = true
+            } label: {
+                Image(systemName: "plus")
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundStyle(FTColors.background)
+                    .frame(width: 56, height: 56)
+                    .background(FTColors.positive)
+                    .clipShape(Circle())
+                    .shadow(color: FTColors.positive.opacity(0.35), radius: 14, x: 0, y: 6)
+            }
+            .buttonStyle(FABStyle())
+            .accessibilityLabel("Add transaction")
+            .padding(.bottom, 96)
         }
         .sheet(isPresented: $showAddTransaction) {
             AddTransactionView()
