@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PrimaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -11,9 +12,9 @@ struct PrimaryButtonStyle: ButtonStyle {
             .padding(.vertical, FTSpacing.md)
             .background(FTColors.positive)
             .clipShape(RoundedRectangle(cornerRadius: FTRadius.lg))
-            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.97 : 1)
             .opacity(configuration.isPressed ? 0.7 : isEnabled ? 1 : 0.4)
-            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
+            .animation(reduceMotion ? .none : .easeInOut(duration: 0.1), value: configuration.isPressed)
     }
 }
 

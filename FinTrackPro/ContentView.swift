@@ -13,13 +13,16 @@ struct ContentView: View {
                     buttonSection
                 }
                 .padding(FTSpacing.lg)
+                .padding(.bottom, FTSpacing.xxxl)
             }
             .background(FTColors.background)
             .navigationTitle("Design System")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbarBackground(FTColors.surface, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
         }
+        .preferredColorScheme(.dark)
     }
 
     private var typographySection: some View {
@@ -104,6 +107,7 @@ struct ContentView: View {
                 Rectangle()
                     .fill(FTColors.border)
                     .frame(height: 0.5)
+                    .accessibilityHidden(true)
                 HStack {
                     CategoryIcon(emoji: "🍔", color: FTColors.negative)
                     VStack(alignment: .leading, spacing: 2) {
