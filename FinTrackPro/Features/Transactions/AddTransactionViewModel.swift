@@ -8,8 +8,12 @@ final class AddTransactionViewModel {
     var title: String = ""
     var note: String = ""
     var selectedCategory: Category?
-    var isIncome: Bool = false
+    var isIncome: Bool
     var date: Date = .now
+
+    init(isIncome: Bool = false) {
+        self.isIncome = isIncome
+    }
 
     var displayAmount: String {
         (Double(amountCents) / 100.0).currencyFormatted

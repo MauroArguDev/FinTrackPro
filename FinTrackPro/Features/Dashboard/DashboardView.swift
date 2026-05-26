@@ -6,6 +6,7 @@ struct DashboardView: View {
     @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
     @State private var viewModel = DashboardViewModel()
     @State private var showAddTransaction = false
+    @State private var addTransactionAsIncome = false
 
     var body: some View {
         NavigationStack {
@@ -18,8 +19,8 @@ struct DashboardView: View {
                         savingsRate: viewModel.savingsRate
                     )
                     QuickActionsView(
-                        onAddExpense: { showAddTransaction = true },
-                        onAddIncome:  { showAddTransaction = true }
+                        onAddExpense: { addTransactionAsIncome = false; showAddTransaction = true },
+                        onAddIncome:  { addTransactionAsIncome = true;  showAddTransaction = true }
                     )
                     RecentTransactionsView(
                         transactions: viewModel.recentTransactions,
@@ -38,7 +39,7 @@ struct DashboardView: View {
             viewModel.update(with: updated)
         }
         .sheet(isPresented: $showAddTransaction) {
-            AddTransactionView()
+            AddTransactionView(isIncome: addTransactionAsIncome)
         }
     }
 }

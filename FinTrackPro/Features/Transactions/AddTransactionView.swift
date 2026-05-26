@@ -4,17 +4,20 @@ import SwiftData
 struct AddTransactionView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Query private var categories: [Category]
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    @State private var viewModel = AddTransactionViewModel()
+    @State private var viewModel: AddTransactionViewModel
     @State private var ftError: FinTrackError?
     @State private var showError = false
     @State private var didAttemptSave = false
     @State private var rawDigits: String = ""
     @FocusState private var amountFocused: Bool
     @FocusState private var titleFocused: Bool
-    @Namespace private var toggleNamespace
+
+    init(isIncome: Bool = false) {
+        _viewModel = State(wrappedValue: AddTransactionViewModel(isIncome: isIncome))
+    }
 
     var body: some View {
         NavigationStack {
@@ -53,70 +56,12 @@ struct AddTransactionView: View {
     // MARK: - Toggle
 
     private var typeToggle: some View {
-        HStack(spacing: 2) {
-            segmentOption(label: "Expense", isSelected: !viewModel.isIncome, selectedColor: FTColors.negative) {
-                withAnimation(reduceMotion ? .none : .spring(response: 0.3, dampingFraction: 0.75)) {
-                    viewModel.isIncome = false
-                }
-            }
-            segmentOption(label: "Income", isSelected: viewModel.isIncome, selectedColor: FTColors.positive) {
-                withAnimation(reduceMotion ? .none : .spring(response: 0.3, dampingFraction: 0.75)) {
-                    viewModel.isIncome = true
-                }
-            }
+        Picker("Transaction type", selection: $viewModel.isIncome) {
+            Text("Expense").tag(false)
+            Text("Income").tag(true)
         }
-        .padding(3)
-        .background {
-            ZStack {
-                RoundedRectangle(cornerRadius: FTRadius.xl)
-                    .fill(.ultraThinMaterial)
-                RoundedRectangle(cornerRadius: FTRadius.xl)
-                    .fill(LinearGradient(
-                        colors: [.white.opacity(0.07), .clear],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    ))
-                RoundedRectangle(cornerRadius: FTRadius.xl)
-                    .strokeBorder(.white.opacity(0.12), lineWidth: 0.5)
-            }
-        }
-    }
-
-    private func segmentOption(label: String, isSelected: Bool, selectedColor: Color, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(label)
-                .font(FTTypo.bodySemi())
-                .foregroundStyle(isSelected ? .white : FTColors.textSecondary)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, FTSpacing.sm + 2)
-                .background {
-                    if isSelected {
-                        RoundedRectangle(cornerRadius: FTRadius.lg)
-                            .fill(LinearGradient(
-                                colors: [selectedColor.opacity(0.95), selectedColor.opacity(0.75)],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            ))
-                            .overlay {
-                                RoundedRectangle(cornerRadius: FTRadius.lg)
-                                    .fill(LinearGradient(
-                                        colors: [.white.opacity(0.2), .clear],
-                                        startPoint: .top,
-                                        endPoint: .center
-                                    ))
-                            }
-                            .overlay {
-                                RoundedRectangle(cornerRadius: FTRadius.lg)
-                                    .strokeBorder(.white.opacity(0.22), lineWidth: 0.5)
-                            }
-                            .shadow(color: selectedColor.opacity(0.45), radius: 8, x: 0, y: 4)
-                            .matchedGeometryEffect(id: "togglePill", in: toggleNamespace)
-                    }
-                }
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(label)
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .pickerStyle(.segmented)
+        .accessibilityLabel("Transaction type")
     }
 
     // MARK: - Amount
