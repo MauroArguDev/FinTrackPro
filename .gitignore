@@ -28,3 +28,6 @@ DerivedData/
 # SPM
 .build/
 .swiftpm/xcode/package.xcworkspace/
+
+# Docs
+Docs/
