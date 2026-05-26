@@ -41,7 +41,7 @@ struct ContentView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             TabView(selection: $selectedTab) {
-                DashboardView()
+                DashboardView(selectedTab: $selectedTab)
                     .tag(AppTab.dashboard)
                     .tabItem { Label("Dashboard", systemImage: "house.fill") }
 

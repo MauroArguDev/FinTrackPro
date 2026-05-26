@@ -1,28 +1,49 @@
 import SwiftUI
+import SwiftData
 
 struct DashboardView: View {
+    @Binding var selectedTab: AppTab
+    @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
+    @State private var viewModel = DashboardViewModel()
+    @State private var showAddTransaction = false
+
     var body: some View {
         NavigationStack {
-            ZStack {
-                FTColors.background.ignoresSafeArea()
-                VStack(spacing: FTSpacing.sm) {
-                    Text("🏠")
-                        .font(.system(size: 40))
-                        .accessibilityHidden(true)
-                    Text("Dashboard")
-                        .font(FTTypo.h2())
-                        .foregroundStyle(FTColors.textPrimary)
-                    Text("Coming in Phase 3")
-                        .font(FTTypo.caption())
-                        .foregroundStyle(FTColors.textDisabled)
+            ScrollView {
+                VStack(spacing: FTSpacing.lg) {
+                    BalanceCardView(
+                        totalBalance: viewModel.totalBalance,
+                        monthlyIncome: viewModel.monthlyIncome,
+                        monthlyExpenses: viewModel.monthlyExpenses,
+                        savingsRate: viewModel.savingsRate
+                    )
+                    QuickActionsView(
+                        onAddExpense: { showAddTransaction = true },
+                        onAddIncome:  { showAddTransaction = true }
+                    )
+                    RecentTransactionsView(
+                        transactions: viewModel.recentTransactions,
+                        onSeeAll: { selectedTab = .transactions }
+                    )
                 }
+                .padding(.horizontal, FTSpacing.lg)
+                .padding(.top, FTSpacing.lg)
+                .padding(.bottom, FTSpacing.xxxl)
             }
+            .background(FTColors.background)
             .navigationTitle("Dashboard")
             .navigationBarTitleDisplayMode(.inline)
+        }
+        .onChange(of: transactions, initial: true) { _, updated in
+            viewModel.update(with: updated)
+        }
+        .sheet(isPresented: $showAddTransaction) {
+            AddTransactionView()
         }
     }
 }
 
 #Preview {
-    DashboardView()
+    DashboardView(selectedTab: .constant(.dashboard))
+        .modelContainer(PreviewSampleData.container)
 }
