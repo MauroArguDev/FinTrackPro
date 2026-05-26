@@ -43,7 +43,11 @@ struct AddTransactionView: View {
                 Text(err.errorDescription ?? "Something went wrong.")
             }
         }
-        .onAppear { amountFocused = true }
+        .onAppear {
+            amountFocused = true
+            applySegmentedStyle(isIncome: viewModel.isIncome)
+        }
+        .onChange(of: viewModel.isIncome) { _, new in applySegmentedStyle(isIncome: new) }
         .onChange(of: rawDigits) { _, new in
             let digits = String(new.filter { $0.isNumber }.prefix(8))
             viewModel.amountCents = Int(digits) ?? 0
@@ -61,7 +65,25 @@ struct AddTransactionView: View {
             Text("Income").tag(true)
         }
         .pickerStyle(.segmented)
+        .id(viewModel.isIncome)
         .accessibilityLabel("Transaction type")
+    }
+
+    // MARK: - Segmented Appearance
+
+    private func applySegmentedStyle(isIncome: Bool) {
+        UISegmentedControl.appearance().backgroundColor = UIColor(FTColors.surface)
+        UISegmentedControl.appearance().selectedSegmentTintColor = isIncome
+            ? UIColor(FTColors.positive)
+            : UIColor(FTColors.negative)
+        UISegmentedControl.appearance().setTitleTextAttributes(
+            [.foregroundColor: UIColor(FTColors.textSecondary)],
+            for: .normal
+        )
+        UISegmentedControl.appearance().setTitleTextAttributes(
+            [.foregroundColor: UIColor.white],
+            for: .selected
+        )
     }
 
     // MARK: - Amount
@@ -102,7 +124,7 @@ struct AddTransactionView: View {
     // MARK: - Form Fields
 
     private var formFields: some View {
-        VStack(spacing: FTSpacing.md) {
+        VStack(spacing: FTSpacing.lg) {
             titleField
             categorySection
             dateRow
