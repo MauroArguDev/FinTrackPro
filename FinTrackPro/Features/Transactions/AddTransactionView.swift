@@ -45,9 +45,8 @@ struct AddTransactionView: View {
         }
         .onAppear {
             amountFocused = true
-            applySegmentedStyle(isIncome: viewModel.isIncome)
+            applySegmentedStyle()
         }
-        .onChange(of: viewModel.isIncome) { _, new in applySegmentedStyle(isIncome: new) }
         .onChange(of: rawDigits) { _, new in
             let digits = String(new.filter { $0.isNumber }.prefix(8))
             viewModel.amountCents = Int(digits) ?? 0
@@ -65,17 +64,14 @@ struct AddTransactionView: View {
             Text("Income").tag(true)
         }
         .pickerStyle(.segmented)
-        .id(viewModel.isIncome)
+        .tint(viewModel.isIncome ? FTColors.positive : FTColors.negative)
         .accessibilityLabel("Transaction type")
     }
 
     // MARK: - Segmented Appearance
 
-    private func applySegmentedStyle(isIncome: Bool) {
+    private func applySegmentedStyle() {
         UISegmentedControl.appearance().backgroundColor = UIColor(FTColors.surface)
-        UISegmentedControl.appearance().selectedSegmentTintColor = isIncome
-            ? UIColor(FTColors.positive)
-            : UIColor(FTColors.negative)
         UISegmentedControl.appearance().setTitleTextAttributes(
             [.foregroundColor: UIColor(FTColors.textSecondary)],
             for: .normal
