@@ -31,7 +31,7 @@ struct DashboardView: View {
                 .padding(.bottom, FTSpacing.xxxl)
             }
             .background(FTColors.background)
-            .navigationTitle("Dashboard")
+            .navigationTitle("FinTrack Pro")
             .navigationBarTitleDisplayMode(.inline)
         }
         .onChange(of: transactions, initial: true) { _, updated in

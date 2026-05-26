@@ -43,7 +43,7 @@ struct ContentView: View {
             TabView(selection: $selectedTab) {
                 DashboardView(selectedTab: $selectedTab)
                     .tag(AppTab.dashboard)
-                    .tabItem { Label("Dashboard", systemImage: "house.fill") }
+                    .tabItem { Label("Home", systemImage: "house.fill") }
 
                 TransactionListView()
                     .tag(AppTab.transactions)
