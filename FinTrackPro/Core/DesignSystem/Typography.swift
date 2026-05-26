@@ -5,7 +5,7 @@ enum FTTypo {
     static let jakarta  = "PlusJakartaSans"
     static let firaCode = "FiraCode"
 
-    static func hero()     -> Font { .custom(syne,     size: 56, relativeTo: .largeTitle).weight(.heavy) }
+    static func hero()     -> Font { .custom(syne,     size: 40, relativeTo: .largeTitle).weight(.heavy) }
     static func h1()       -> Font { .custom(syne,     size: 32, relativeTo: .title).weight(.bold) }
     static func h2()       -> Font { .custom(syne,     size: 22, relativeTo: .title2).weight(.semibold) }
     static func body()     -> Font { .custom(jakarta,  size: 15, relativeTo: .body).weight(.regular) }

@@ -1,55 +1,64 @@
-//
-//  ContentView.swift
-//  FinTrackPro
-//
-//  Created by Mauricio Argumedo on 8/5/26.
-//
-
 import SwiftUI
-import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
+        ZStack {
+            FTColors.background.ignoresSafeArea()
+            ScrollView {
+                VStack(alignment: .leading, spacing: FTSpacing.xl) {
+                    Group {
+                        Text("Syne — Display")
+                            .font(FTTypo.h2())
+                            .foregroundStyle(FTColors.textSecondary)
+                        Text("Hero 40px Heavy")
+                            .font(FTTypo.hero())
+                            .foregroundStyle(FTColors.textPrimary)
+                        Text("H1 32px Bold")
+                            .font(FTTypo.h1())
+                            .foregroundStyle(FTColors.textPrimary)
+                        Text("H2 22px SemiBold")
+                            .font(FTTypo.h2())
+                            .foregroundStyle(FTColors.textPrimary)
+                    }
+
+                    Divider().overlay(FTColors.border)
+
+                    Group {
+                        Text("Plus Jakarta Sans — Body")
+                            .font(FTTypo.h2())
+                            .foregroundStyle(FTColors.textSecondary)
+                        Text("Body 15px Regular")
+                            .font(FTTypo.body())
+                            .foregroundStyle(FTColors.textPrimary)
+                        Text("Body Semi 15px SemiBold")
+                            .font(FTTypo.bodySemi())
+                            .foregroundStyle(FTColors.textPrimary)
+                        Text("Caption 12px Medium")
+                            .font(FTTypo.caption())
+                            .foregroundStyle(FTColors.textPrimary)
+                    }
+
+                    Divider().overlay(FTColors.border)
+
+                    Group {
+                        Text("Fira Code — Data")
+                            .font(FTTypo.h2())
+                            .foregroundStyle(FTColors.textSecondary)
+                        Text("+$12,840.50")
+                            .font(FTTypo.amountLg())
+                            .foregroundStyle(FTColors.positive)
+                        Text("-$1,240.00")
+                            .font(FTTypo.amount())
+                            .foregroundStyle(FTColors.negative)
+                        Text("76.4% used · 2026-05-26")
+                            .font(FTTypo.data())
+                            .foregroundStyle(FTColors.warning)
+                        Text("LABEL 10px")
+                            .font(FTTypo.label())
+                            .foregroundStyle(FTColors.textDisabled)
                     }
                 }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
-        } detail: {
-            Text("Select an item")
-        }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+                .padding(FTSpacing.xl)
             }
         }
     }
@@ -57,5 +66,4 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
 }
