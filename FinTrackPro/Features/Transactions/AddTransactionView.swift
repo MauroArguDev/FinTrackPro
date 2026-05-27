@@ -69,7 +69,6 @@ struct AddTransactionView: View {
     }
 
     // MARK: - Segmented Appearance
-
     private func applySegmentedStyle() {
         UISegmentedControl.appearance().backgroundColor = UIColor(FTColors.surface)
         UISegmentedControl.appearance().setTitleTextAttributes(
@@ -99,13 +98,16 @@ struct AddTransactionView: View {
                 .contentTransition(.numericText())
                 .animation(reduceMotion ? .none : .spring(response: 0.25, dampingFraction: 0.8), value: viewModel.amountCents)
                 .frame(maxWidth: .infinity, alignment: .center)
-                .overlay {
-                    TextField("", text: $rawDigits)
-                        .keyboardType(.numberPad)
-                        .focused($amountFocused)
-                        .opacity(0.001)
-                        .accessibilityLabel("Amount in cents")
-                }
+                .padding(.vertical, FTSpacing.sm)
+                .contentShape(Rectangle())
+                .onTapGesture { amountFocused = true }
+
+            TextField("", text: $rawDigits)
+                .keyboardType(.numberPad)
+                .focused($amountFocused)
+                .frame(width: 1, height: 1)
+                .opacity(0.001)
+                .accessibilityLabel("Amount input")
 
             if didAttemptSave && viewModel.amountCents == 0 {
                 Text("Enter an amount greater than zero")
