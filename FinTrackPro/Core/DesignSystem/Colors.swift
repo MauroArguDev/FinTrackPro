@@ -30,8 +30,8 @@ extension Color {
 
     init?(hexString: String?) {
         guard let raw = hexString else { return nil }
-        let stripped = raw.trimmingCharacters(in: CharacterSet(charactersIn: "#"))
-        guard stripped.count == 6, let value = UInt(stripped, radix: 16) else { return nil }
+        let hex = raw.hasPrefix("#") ? String(raw.dropFirst()) : raw
+        guard hex.count == 6, let value = UInt(hex, radix: 16) else { return nil }
         self.init(hex: value)
     }
 }

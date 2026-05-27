@@ -10,7 +10,7 @@ struct TransactionRowView: View {
                 color: Color(hexString: transaction.category?.colorHex) ?? FTColors.textSecondary
             )
 
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: FTSpacing.xs) {
                 Text(transaction.title)
                     .font(FTTypo.bodySemi())
                     .foregroundStyle(FTColors.textPrimary)
