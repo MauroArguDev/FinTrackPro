@@ -12,6 +12,7 @@ struct AddTransactionView: View {
     @State private var showError = false
     @State private var didAttemptSave = false
     @State private var rawDigits: String = ""
+    @State private var showAddCategory = false
     @FocusState private var amountFocused: Bool
     @FocusState private var titleFocused: Bool
 
@@ -54,6 +55,11 @@ struct AddTransactionView: View {
         }
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
+        .sheet(isPresented: $showAddCategory) {
+            AddCategoryView { newCategory in
+                viewModel.selectedCategory = newCategory
+            }
+        }
     }
 
     // MARK: - Toggle
@@ -188,8 +194,12 @@ struct AddTransactionView: View {
                     .foregroundStyle(FTColors.textDisabled)
                     .padding(FTSpacing.md)
             } else {
-                CategoryPicker(categories: categories, selected: $viewModel.selectedCategory)
-                    .padding(FTSpacing.sm)
+                CategoryPicker(
+                    categories: categories,
+                    selected: $viewModel.selectedCategory,
+                    onAddTapped: { showAddCategory = true }
+                )
+                .padding(FTSpacing.sm)
             }
             if needsSelection {
                 sectionDivider
@@ -258,6 +268,37 @@ struct AddTransactionView: View {
                 .font(FTTypo.bodySemi())
                 .foregroundStyle(FTColors.positive)
         }
+        ToolbarItemGroup(placement: .keyboard) {
+            Spacer()
+            keyboardDoneButton
+        }
+    }
+
+    private var keyboardDoneButton: some View {
+        Button("Done") {
+            UIApplication.shared.sendAction(
+                #selector(UIResponder.resignFirstResponder),
+                to: nil, from: nil, for: nil
+            )
+        }
+        .font(FTTypo.bodySemi())
+        .foregroundStyle(FTColors.textPrimary)
+        .padding(.horizontal, FTSpacing.md)
+        .padding(.vertical, FTSpacing.xs)
+        .background(.ultraThinMaterial, in: Capsule())
+        .overlay(
+            Capsule()
+                .strokeBorder(
+                    LinearGradient(
+                        colors: [.white.opacity(0.35), .white.opacity(0.08)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ),
+                    lineWidth: 0.5
+                )
+        )
+        .shadow(color: .black.opacity(0.12), radius: 6, x: 0, y: 3)
+        .accessibilityLabel("Dismiss keyboard")
     }
 
     private func attemptSave() {

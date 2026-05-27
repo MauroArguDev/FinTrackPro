@@ -3,6 +3,7 @@ import SwiftUI
 struct CategoryPicker: View {
     let categories: [Category]
     @Binding var selected: Category?
+    var onAddTapped: (() -> Void)? = nil
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: FTSpacing.sm), count: 5)
@@ -11,6 +12,9 @@ struct CategoryPicker: View {
         LazyVGrid(columns: columns, spacing: FTSpacing.sm) {
             ForEach(categories, id: \.id) { category in
                 tile(for: category)
+            }
+            if let onAdd = onAddTapped {
+                addCell(action: onAdd)
             }
         }
     }
@@ -44,5 +48,28 @@ struct CategoryPicker: View {
         .buttonStyle(.plain)
         .accessibilityLabel(category.name)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+
+    private func addCell(action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: FTSpacing.xs) {
+                Image(systemName: "plus")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundStyle(FTColors.textSecondary)
+                    .frame(width: 44, height: 44)
+                    .background(FTColors.elevated)
+                    .clipShape(RoundedRectangle(cornerRadius: FTRadius.md))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: FTRadius.md)
+                            .strokeBorder(FTColors.border, lineWidth: 1)
+                    )
+                Text("New")
+                    .font(FTTypo.caption())
+                    .foregroundStyle(FTColors.textSecondary)
+                    .lineLimit(1)
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Add new category")
     }
 }

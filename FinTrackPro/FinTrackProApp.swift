@@ -16,6 +16,13 @@ struct FinTrackProApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .task {
+                    let context = sharedModelContainer.mainContext
+                    let count = (try? context.fetchCount(FetchDescriptor<Category>())) ?? 0
+                    guard count == 0 else { return }
+                    Category.defaults().forEach { context.insert($0) }
+                    try? context.save()
+                }
         }
         .modelContainer(sharedModelContainer)
     }
