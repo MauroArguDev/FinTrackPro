@@ -4,31 +4,43 @@ import SwiftData
 
 @Observable
 final class AddTransactionViewModel {
-    var amountText: String = ""
+    var amountCents: Int = 0
     var title: String = ""
     var note: String = ""
     var selectedCategory: Category?
-    var isIncome: Bool = false
+    var isIncome: Bool
     var date: Date = .now
 
-    var isValid: Bool {
-        parsedAmount != nil && !title.trimmingCharacters(in: .whitespaces).isEmpty && selectedCategory != nil
+    init(isIncome: Bool = false) {
+        self.isIncome = isIncome
     }
 
-    var parsedAmount: Double? {
-        let cleaned = amountText.replacingOccurrences(of: ",", with: ".")
-        guard let value = Double(cleaned), value > 0 else { return nil }
-        return value
+    var displayAmount: String {
+        (Double(amountCents) / 100.0).currencyFormatted
+    }
+
+    var isValid: Bool {
+        amountCents > 0
+            && !title.trimmingCharacters(in: .whitespaces).isEmpty
+            && selectedCategory != nil
     }
 
     func save(context: ModelContext) throws {
-        guard let amount = parsedAmount else { throw FinTrackError.saveFailed(underlying: ValidationError.invalidAmount) }
-        guard !title.trimmingCharacters(in: .whitespaces).isEmpty else { throw FinTrackError.saveFailed(underlying: ValidationError.emptyTitle) }
+        let trimmedTitle = title.trimmingCharacters(in: .whitespaces)
+        let trimmedNote  = note.trimmingCharacters(in: .whitespaces)
+        let amount       = Double(amountCents) / 100.0
+
+        guard amountCents > 0 else {
+            throw FinTrackError.saveFailed(underlying: SaveError.invalidAmount)
+        }
+        guard !trimmedTitle.isEmpty else {
+            throw FinTrackError.saveFailed(underlying: SaveError.emptyTitle)
+        }
 
         let transaction = Transaction(
             amount: amount,
-            title: title.trimmingCharacters(in: .whitespaces),
-            note: note.isEmpty ? nil : note.trimmingCharacters(in: .whitespaces),
+            title: trimmedTitle,
+            note: trimmedNote.isEmpty ? nil : trimmedNote,
             date: date,
             isIncome: isIncome,
             category: selectedCategory
@@ -44,7 +56,7 @@ final class AddTransactionViewModel {
     }
 
     func reset() {
-        amountText = ""
+        amountCents = 0
         title = ""
         note = ""
         selectedCategory = nil
@@ -52,7 +64,7 @@ final class AddTransactionViewModel {
         date = .now
     }
 
-    private enum ValidationError: Error {
+    private enum SaveError: Error {
         case invalidAmount
         case emptyTitle
     }

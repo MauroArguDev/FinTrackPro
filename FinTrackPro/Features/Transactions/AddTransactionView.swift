@@ -5,12 +5,20 @@ struct AddTransactionView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
     @Query private var categories: [Category]
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    @State private var viewModel = AddTransactionViewModel()
-    @State private var error: FinTrackError?
+    @State private var viewModel: AddTransactionViewModel
+    @State private var ftError: FinTrackError?
     @State private var showError = false
+    @State private var didAttemptSave = false
+    @State private var rawDigits: String = ""
+    @State private var showAddCategory = false
     @FocusState private var amountFocused: Bool
     @FocusState private var titleFocused: Bool
+
+    init(isIncome: Bool = false) {
+        _viewModel = State(wrappedValue: AddTransactionViewModel(isIncome: isIncome))
+    }
 
     var body: some View {
         NavigationStack {
@@ -20,7 +28,7 @@ struct AddTransactionView: View {
                     VStack(spacing: FTSpacing.xl) {
                         typeToggle
                         amountSection
-                        formSection
+                        formFields
                     }
                     .padding(.horizontal, FTSpacing.lg)
                     .padding(.top, FTSpacing.lg)
@@ -30,44 +38,57 @@ struct AddTransactionView: View {
             .navigationTitle(viewModel.isIncome ? "Add Income" : "Add Expense")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbarContent }
-            .alert("Error", isPresented: $showError, presenting: error) { _ in
+            .alert("Error", isPresented: $showError, presenting: ftError) { _ in
                 Button("OK", role: .cancel) {}
             } message: { err in
                 Text(err.errorDescription ?? "Something went wrong.")
             }
         }
-        .onAppear { amountFocused = true }
+        .onAppear {
+            amountFocused = true
+            applySegmentedStyle()
+        }
+        .onChange(of: rawDigits) { _, new in
+            let digits = String(new.filter { $0.isNumber }.prefix(8))
+            viewModel.amountCents = Int(digits) ?? 0
+            if digits != new { rawDigits = digits }
+        }
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
+        .sheet(isPresented: $showAddCategory) {
+            AddCategoryView { newCategory in
+                viewModel.selectedCategory = newCategory
+            }
+        }
     }
+
+    // MARK: - Toggle
 
     private var typeToggle: some View {
-        HStack(spacing: 0) {
-            toggleButton(label: "Expense", isSelected: !viewModel.isIncome, color: FTColors.negative) {
-                viewModel.isIncome = false
-            }
-            toggleButton(label: "Income", isSelected: viewModel.isIncome, color: FTColors.positive) {
-                viewModel.isIncome = true
-            }
+        Picker("Transaction type", selection: $viewModel.isIncome) {
+            Text("Expense").tag(false)
+            Text("Income").tag(true)
         }
-        .background(FTColors.card)
-        .clipShape(RoundedRectangle(cornerRadius: FTRadius.lg))
+        .pickerStyle(.segmented)
+        .tint(viewModel.isIncome ? FTColors.positive : FTColors.negative)
+        .accessibilityLabel("Transaction type")
     }
 
-    private func toggleButton(label: String, isSelected: Bool, color: Color, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(label)
-                .font(FTTypo.bodySemi())
-                .foregroundStyle(isSelected ? FTColors.background : FTColors.textSecondary)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, FTSpacing.sm)
-                .background(isSelected ? color : Color.clear)
-                .clipShape(RoundedRectangle(cornerRadius: FTRadius.lg))
-                .animation(.easeInOut(duration: 0.2), value: isSelected)
-        }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
+    private func applySegmentedStyle() {
+        UISegmentedControl.appearance().backgroundColor = UIColor(FTColors.surface)
+        UISegmentedControl.appearance().setTitleTextAttributes(
+            [.foregroundColor: UIColor(FTColors.textSecondary)],
+            for: .normal
+        )
+        UISegmentedControl.appearance().setTitleTextAttributes(
+            [.foregroundColor: UIColor.white],
+            for: .selected
+        )
     }
+
+    // MARK: - Amount
+
+    private var amountColor: Color { viewModel.isIncome ? FTColors.positive : FTColors.negative }
 
     private var amountSection: some View {
         VStack(spacing: FTSpacing.xs) {
@@ -75,41 +96,65 @@ struct AddTransactionView: View {
                 .font(FTTypo.data())
                 .foregroundStyle(FTColors.textDisabled)
                 .accessibilityHidden(true)
-            HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text("$")
-                    .font(FTTypo.h1())
-                    .foregroundStyle(amountColor.opacity(0.7))
-                TextField("0.00", text: $viewModel.amountText)
-                    .font(FTTypo.amountLg())
-                    .foregroundStyle(amountColor)
-                    .keyboardType(.decimalPad)
-                    .multilineTextAlignment(.leading)
-                    .focused($amountFocused)
-                    .accessibilityLabel("Amount")
-                    .frame(maxWidth: .infinity)
+
+            Text(viewModel.displayAmount)
+                .font(FTTypo.amountLg())
+                .foregroundStyle(viewModel.amountCents == 0 ? FTColors.textDisabled : amountColor)
+                .contentTransition(.numericText())
+                .animation(reduceMotion ? .none : .spring(response: 0.25, dampingFraction: 0.8), value: viewModel.amountCents)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.vertical, FTSpacing.sm)
+                .contentShape(Rectangle())
+                .onTapGesture { amountFocused = true }
+
+            TextField("", text: $rawDigits)
+                .keyboardType(.numberPad)
+                .focused($amountFocused)
+                .frame(width: 1, height: 1)
+                .opacity(0.001)
+                .accessibilityLabel("Amount input")
+
+            if didAttemptSave && viewModel.amountCents == 0 {
+                Text("Enter an amount greater than zero")
+                    .font(FTTypo.caption())
+                    .foregroundStyle(FTColors.negative)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
             }
-            .padding(.horizontal, FTSpacing.lg)
         }
+        .animation(reduceMotion ? .none : .easeInOut(duration: 0.2), value: didAttemptSave)
     }
 
-    private var amountColor: Color {
-        viewModel.isIncome ? FTColors.positive : FTColors.negative
-    }
+    // MARK: - Form Fields
 
-    private var formSection: some View {
-        VStack(spacing: FTSpacing.md) {
-            titleField
+    private var formFields: some View {
+        VStack(spacing: FTSpacing.xl) {
+            titleSection
             categorySection
             dateSection
-            noteField
+            noteSection
         }
     }
 
-    private var titleField: some View {
-        VStack(alignment: .leading, spacing: FTSpacing.xs) {
-            Text("TITLE")
-                .font(FTTypo.data())
-                .foregroundStyle(FTColors.textDisabled)
+    private func sectionHeader(_ label: String, isError: Bool = false) -> some View {
+        Text(label)
+            .font(FTTypo.data())
+            .foregroundStyle(isError ? FTColors.negative : FTColors.textSecondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, FTSpacing.md)
+            .padding(.vertical, FTSpacing.sm)
+    }
+
+    private var sectionDivider: some View {
+        Rectangle()
+            .fill(FTColors.border)
+            .frame(height: 0.5)
+    }
+
+    private var titleSection: some View {
+        let isEmpty = didAttemptSave && viewModel.title.trimmingCharacters(in: .whitespaces).isEmpty
+        return VStack(spacing: 0) {
+            sectionHeader("TITLE", isError: isEmpty)
+            sectionDivider
             TextField("e.g. Grocery run", text: $viewModel.title)
                 .font(FTTypo.body())
                 .foregroundStyle(FTColors.textPrimary)
@@ -118,54 +163,98 @@ struct AddTransactionView: View {
                 .onSubmit { titleFocused = false }
                 .accessibilityLabel("Transaction title")
                 .padding(FTSpacing.md)
-                .background(FTColors.card)
-                .clipShape(RoundedRectangle(cornerRadius: FTRadius.md))
+            if isEmpty {
+                sectionDivider
+                Text("Title is required")
+                    .font(FTTypo.caption())
+                    .foregroundStyle(FTColors.negative)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, FTSpacing.md)
+                    .padding(.vertical, FTSpacing.xs)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
         }
+        .background(FTColors.card)
+        .clipShape(RoundedRectangle(cornerRadius: FTRadius.lg))
+        .overlay {
+            RoundedRectangle(cornerRadius: FTRadius.lg)
+                .strokeBorder(isEmpty ? FTColors.negative : Color.clear, lineWidth: 1.5)
+        }
+        .animation(reduceMotion ? .none : .easeInOut(duration: 0.2), value: didAttemptSave)
     }
 
     private var categorySection: some View {
-        VStack(alignment: .leading, spacing: FTSpacing.sm) {
-            Text("CATEGORY")
-                .font(FTTypo.data())
-                .foregroundStyle(FTColors.textDisabled)
+        let needsSelection = didAttemptSave && viewModel.selectedCategory == nil
+        return VStack(spacing: 0) {
+            sectionHeader("CATEGORY", isError: needsSelection)
+            sectionDivider
             if categories.isEmpty {
                 Text("No categories available")
                     .font(FTTypo.body())
                     .foregroundStyle(FTColors.textDisabled)
+                    .padding(FTSpacing.md)
             } else {
-                CategoryPicker(categories: categories, selected: $viewModel.selectedCategory)
+                CategoryPicker(
+                    categories: categories,
+                    selected: $viewModel.selectedCategory,
+                    onAddTapped: { showAddCategory = true }
+                )
+                .padding(FTSpacing.sm)
+            }
+            if needsSelection {
+                sectionDivider
+                Text("Select a category")
+                    .font(FTTypo.caption())
+                    .foregroundStyle(FTColors.negative)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, FTSpacing.md)
+                    .padding(.vertical, FTSpacing.xs)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
+        .background(FTColors.card)
+        .clipShape(RoundedRectangle(cornerRadius: FTRadius.lg))
+        .overlay {
+            RoundedRectangle(cornerRadius: FTRadius.lg)
+                .strokeBorder(needsSelection ? FTColors.negative : Color.clear, lineWidth: 1.5)
+        }
+        .animation(reduceMotion ? .none : .easeInOut(duration: 0.2), value: didAttemptSave)
     }
 
     private var dateSection: some View {
-        VStack(alignment: .leading, spacing: FTSpacing.xs) {
-            Text("DATE")
-                .font(FTTypo.data())
-                .foregroundStyle(FTColors.textDisabled)
-            DatePicker("", selection: $viewModel.date, displayedComponents: [.date])
-                .datePickerStyle(.compact)
-                .labelsHidden()
-                .tint(FTColors.positive)
-                .accessibilityLabel("Transaction date")
+        VStack(spacing: 0) {
+            sectionHeader("DATE")
+            sectionDivider
+            HStack {
+                DatePicker("", selection: $viewModel.date, displayedComponents: [.date])
+                    .datePickerStyle(.compact)
+                    .labelsHidden()
+                    .tint(FTColors.positive)
+                    .accessibilityLabel("Transaction date")
+                Spacer()
+            }
+            .padding(FTSpacing.md)
         }
+        .background(FTColors.card)
+        .clipShape(RoundedRectangle(cornerRadius: FTRadius.lg))
     }
 
-    private var noteField: some View {
-        VStack(alignment: .leading, spacing: FTSpacing.xs) {
-            Text("NOTE (OPTIONAL)")
-                .font(FTTypo.data())
-                .foregroundStyle(FTColors.textDisabled)
+    private var noteSection: some View {
+        VStack(spacing: 0) {
+            sectionHeader("NOTE (OPTIONAL)")
+            sectionDivider
             TextField("Add a note…", text: $viewModel.note, axis: .vertical)
                 .font(FTTypo.body())
                 .foregroundStyle(FTColors.textPrimary)
                 .lineLimit(3)
                 .accessibilityLabel("Note")
                 .padding(FTSpacing.md)
-                .background(FTColors.card)
-                .clipShape(RoundedRectangle(cornerRadius: FTRadius.md))
         }
+        .background(FTColors.card)
+        .clipShape(RoundedRectangle(cornerRadius: FTRadius.lg))
     }
+
+    // MARK: - Toolbar
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
@@ -175,24 +264,63 @@ struct AddTransactionView: View {
                 .foregroundStyle(FTColors.textSecondary)
         }
         ToolbarItem(placement: .confirmationAction) {
-            Button("Save") { save() }
+            Button("Save") { attemptSave() }
                 .font(FTTypo.bodySemi())
-                .foregroundStyle(viewModel.isValid ? FTColors.positive : FTColors.textDisabled)
-                .disabled(!viewModel.isValid)
+                .foregroundStyle(FTColors.positive)
+        }
+        ToolbarItemGroup(placement: .keyboard) {
+            Spacer()
+            keyboardDoneButton
         }
     }
 
-    private func save() {
+    private var keyboardDoneButton: some View {
+        Button("Done") {
+            UIApplication.shared.sendAction(
+                #selector(UIResponder.resignFirstResponder),
+                to: nil, from: nil, for: nil
+            )
+        }
+        .font(FTTypo.bodySemi())
+        .foregroundStyle(FTColors.textPrimary)
+        .padding(.horizontal, FTSpacing.md)
+        .padding(.vertical, FTSpacing.xs)
+        .background(.ultraThinMaterial, in: Capsule())
+        .overlay(
+            Capsule()
+                .strokeBorder(
+                    LinearGradient(
+                        colors: [.white.opacity(0.35), .white.opacity(0.08)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ),
+                    lineWidth: 0.5
+                )
+        )
+        .shadow(color: .black.opacity(0.12), radius: 6, x: 0, y: 3)
+        .accessibilityLabel("Dismiss keyboard")
+    }
+
+    private func attemptSave() {
+        guard viewModel.isValid else {
+            withAnimation(reduceMotion ? .none : .easeInOut(duration: 0.2)) {
+                didAttemptSave = true
+            }
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            if viewModel.amountCents == 0 { amountFocused = true }
+            else if viewModel.title.trimmingCharacters(in: .whitespaces).isEmpty { titleFocused = true }
+            return
+        }
         do {
             try viewModel.save(context: context)
             UINotificationFeedbackGenerator().notificationOccurred(.success)
             dismiss()
-        } catch let ftError as FinTrackError {
-            error = ftError
+        } catch let err as FinTrackError {
+            ftError = err
             showError = true
             UINotificationFeedbackGenerator().notificationOccurred(.error)
         } catch {
-            self.error = .saveFailed(underlying: error)
+            ftError = .saveFailed(underlying: error)
             showError = true
             UINotificationFeedbackGenerator().notificationOccurred(.error)
         }

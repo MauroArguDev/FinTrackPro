@@ -1,6 +1,5 @@
 import Foundation
 import Observation
-import SwiftData
 
 @Observable
 final class DashboardViewModel {
@@ -11,18 +10,32 @@ final class DashboardViewModel {
     private(set) var recentTransactions: [Transaction] = []
 
     func update(with transactions: [Transaction]) {
+        guard !transactions.isEmpty else {
+            totalBalance = 0
+            monthlyIncome = 0
+            monthlyExpenses = 0
+            savingsRate = 0
+            recentTransactions = []
+            return
+        }
+
         let comps = Calendar.current.dateComponents([.year, .month], from: .now)
         let monthStart = Calendar.current.date(from: comps) ?? .now
 
-        totalBalance = transactions.reduce(0) { $0 + $1.signedAmount }
+        var balance = 0.0
+        var income = 0.0
+        var expenses = 0.0
 
-        let thisMonth = transactions.filter { $0.date >= monthStart }
-        monthlyIncome = thisMonth.filter(\.isIncome).reduce(0) { $0 + $1.amount }
-        monthlyExpenses = thisMonth.filter(\.isExpense).reduce(0) { $0 + $1.amount }
-        savingsRate = monthlyIncome > 0
-            ? max(0, min(1, (monthlyIncome - monthlyExpenses) / monthlyIncome))
-            : 0
+        for tx in transactions {
+            balance += tx.signedAmount
+            guard tx.date >= monthStart else { continue }
+            if tx.isIncome { income += tx.amount } else { expenses += tx.amount }
+        }
 
-        recentTransactions = Array(transactions.sorted { $0.date > $1.date }.prefix(5))
+        totalBalance = balance
+        monthlyIncome = income
+        monthlyExpenses = expenses
+        savingsRate = income > 0 ? max(0, min(1, (income - expenses) / income)) : 0
+        recentTransactions = Array(transactions.prefix(5))
     }
 }

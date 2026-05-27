@@ -19,7 +19,7 @@ private struct FABStyle: ButtonStyle {
 
 struct ContentView: View {
     @State private var selectedTab: AppTab = .dashboard
-    @State private var showAddTransaction = false
+    @State private var transactionIntent: TransactionIntent?
 
     init() {
         let tab = UITabBarAppearance()
@@ -61,7 +61,7 @@ struct ContentView: View {
             .preferredColorScheme(.dark)
 
             Button {
-                showAddTransaction = true
+                transactionIntent = TransactionIntent(isIncome: false)
             } label: {
                 Image(systemName: "plus")
                     .font(.system(size: 22, weight: .semibold))
@@ -75,8 +75,8 @@ struct ContentView: View {
             .accessibilityLabel("Add transaction")
             .padding(.bottom, 96)
         }
-        .sheet(isPresented: $showAddTransaction) {
-            AddTransactionView()
+        .sheet(item: $transactionIntent) { intent in
+            AddTransactionView(isIncome: intent.isIncome)
         }
     }
 }
