@@ -68,7 +68,6 @@ struct AddTransactionView: View {
         .accessibilityLabel("Transaction type")
     }
 
-    // MARK: - Segmented Appearance
     private func applySegmentedStyle() {
         UISegmentedControl.appearance().backgroundColor = UIColor(FTColors.surface)
         UISegmentedControl.appearance().setTitleTextAttributes(
@@ -122,20 +121,34 @@ struct AddTransactionView: View {
     // MARK: - Form Fields
 
     private var formFields: some View {
-        VStack(spacing: FTSpacing.lg) {
-            titleField
+        VStack(spacing: FTSpacing.xl) {
+            titleSection
             categorySection
-            dateRow
-            noteField
+            dateSection
+            noteSection
         }
     }
 
-    private var titleField: some View {
+    private func sectionHeader(_ label: String, isError: Bool = false) -> some View {
+        Text(label)
+            .font(FTTypo.data())
+            .foregroundStyle(isError ? FTColors.negative : FTColors.textSecondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, FTSpacing.md)
+            .padding(.vertical, FTSpacing.sm)
+    }
+
+    private var sectionDivider: some View {
+        Rectangle()
+            .fill(FTColors.border)
+            .frame(height: 0.5)
+    }
+
+    private var titleSection: some View {
         let isEmpty = didAttemptSave && viewModel.title.trimmingCharacters(in: .whitespaces).isEmpty
-        return VStack(alignment: .leading, spacing: FTSpacing.xs) {
-            Text("TITLE")
-                .font(FTTypo.data())
-                .foregroundStyle(isEmpty ? FTColors.negative : FTColors.textDisabled)
+        return VStack(spacing: 0) {
+            sectionHeader("TITLE", isError: isEmpty)
+            sectionDivider
             TextField("e.g. Grocery run", text: $viewModel.title)
                 .font(FTTypo.body())
                 .foregroundStyle(FTColors.textPrimary)
@@ -144,89 +157,91 @@ struct AddTransactionView: View {
                 .onSubmit { titleFocused = false }
                 .accessibilityLabel("Transaction title")
                 .padding(FTSpacing.md)
-                .background(FTColors.card)
-                .clipShape(RoundedRectangle(cornerRadius: FTRadius.md))
-                .overlay {
-                    RoundedRectangle(cornerRadius: FTRadius.md)
-                        .strokeBorder(isEmpty ? FTColors.negative : Color.clear, lineWidth: 1.5)
-                }
             if isEmpty {
+                sectionDivider
                 Text("Title is required")
                     .font(FTTypo.caption())
                     .foregroundStyle(FTColors.negative)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, FTSpacing.md)
+                    .padding(.vertical, FTSpacing.xs)
                     .transition(.opacity.combined(with: .move(edge: .top)))
             }
+        }
+        .background(FTColors.card)
+        .clipShape(RoundedRectangle(cornerRadius: FTRadius.lg))
+        .overlay {
+            RoundedRectangle(cornerRadius: FTRadius.lg)
+                .strokeBorder(isEmpty ? FTColors.negative : Color.clear, lineWidth: 1.5)
         }
         .animation(reduceMotion ? .none : .easeInOut(duration: 0.2), value: didAttemptSave)
     }
 
     private var categorySection: some View {
         let needsSelection = didAttemptSave && viewModel.selectedCategory == nil
-        return VStack(alignment: .leading, spacing: FTSpacing.sm) {
-            HStack(alignment: .firstTextBaseline) {
-                Text("CATEGORY")
-                    .font(FTTypo.data())
-                    .foregroundStyle(needsSelection ? FTColors.negative : FTColors.textDisabled)
-                Spacer()
-                if needsSelection {
-                    Text("Select a category")
-                        .font(FTTypo.caption())
-                        .foregroundStyle(FTColors.negative)
-                        .transition(.opacity)
-                }
-            }
-            .animation(reduceMotion ? .none : .easeInOut(duration: 0.2), value: didAttemptSave)
-
+        return VStack(spacing: 0) {
+            sectionHeader("CATEGORY", isError: needsSelection)
+            sectionDivider
             if categories.isEmpty {
                 Text("No categories available")
                     .font(FTTypo.body())
                     .foregroundStyle(FTColors.textDisabled)
+                    .padding(FTSpacing.md)
             } else {
                 CategoryPicker(categories: categories, selected: $viewModel.selectedCategory)
                     .padding(FTSpacing.sm)
-                    .background(FTColors.card)
-                    .clipShape(RoundedRectangle(cornerRadius: FTRadius.md))
-                    .overlay {
-                        RoundedRectangle(cornerRadius: FTRadius.md)
-                            .strokeBorder(needsSelection ? FTColors.negative : Color.clear, lineWidth: 1.5)
-                    }
-                    .animation(reduceMotion ? .none : .easeInOut(duration: 0.2), value: didAttemptSave)
+            }
+            if needsSelection {
+                sectionDivider
+                Text("Select a category")
+                    .font(FTTypo.caption())
+                    .foregroundStyle(FTColors.negative)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, FTSpacing.md)
+                    .padding(.vertical, FTSpacing.xs)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
-    }
-
-    private var dateRow: some View {
-        HStack {
-            Text("DATE")
-                .font(FTTypo.data())
-                .foregroundStyle(FTColors.textDisabled)
-            Spacer()
-            DatePicker("", selection: $viewModel.date, displayedComponents: [.date])
-                .datePickerStyle(.compact)
-                .labelsHidden()
-                .tint(FTColors.positive)
-                .accessibilityLabel("Transaction date")
-        }
-        .padding(.horizontal, FTSpacing.md)
-        .padding(.vertical, FTSpacing.sm + 2)
         .background(FTColors.card)
-        .clipShape(RoundedRectangle(cornerRadius: FTRadius.md))
+        .clipShape(RoundedRectangle(cornerRadius: FTRadius.lg))
+        .overlay {
+            RoundedRectangle(cornerRadius: FTRadius.lg)
+                .strokeBorder(needsSelection ? FTColors.negative : Color.clear, lineWidth: 1.5)
+        }
+        .animation(reduceMotion ? .none : .easeInOut(duration: 0.2), value: didAttemptSave)
     }
 
-    private var noteField: some View {
-        VStack(alignment: .leading, spacing: FTSpacing.xs) {
-            Text("NOTE (OPTIONAL)")
-                .font(FTTypo.data())
-                .foregroundStyle(FTColors.textDisabled)
+    private var dateSection: some View {
+        VStack(spacing: 0) {
+            sectionHeader("DATE")
+            sectionDivider
+            HStack {
+                DatePicker("", selection: $viewModel.date, displayedComponents: [.date])
+                    .datePickerStyle(.compact)
+                    .labelsHidden()
+                    .tint(FTColors.positive)
+                    .accessibilityLabel("Transaction date")
+                Spacer()
+            }
+            .padding(FTSpacing.md)
+        }
+        .background(FTColors.card)
+        .clipShape(RoundedRectangle(cornerRadius: FTRadius.lg))
+    }
+
+    private var noteSection: some View {
+        VStack(spacing: 0) {
+            sectionHeader("NOTE (OPTIONAL)")
+            sectionDivider
             TextField("Add a note…", text: $viewModel.note, axis: .vertical)
                 .font(FTTypo.body())
                 .foregroundStyle(FTColors.textPrimary)
                 .lineLimit(3)
                 .accessibilityLabel("Note")
                 .padding(FTSpacing.md)
-                .background(FTColors.card)
-                .clipShape(RoundedRectangle(cornerRadius: FTRadius.md))
         }
+        .background(FTColors.card)
+        .clipShape(RoundedRectangle(cornerRadius: FTRadius.lg))
     }
 
     // MARK: - Toolbar
