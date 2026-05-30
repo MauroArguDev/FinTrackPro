@@ -27,7 +27,15 @@ struct BalanceCardView: View {
                 .kerning(0.5)
             Text(totalBalance.currencyFormatted)
                 .font(FTTypo.amountLg())
-                .foregroundStyle(totalBalance >= 0 ? FTColors.positive : FTColors.negative)
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: totalBalance >= 0
+                            ? [FTColors.positive, FTColors.positive.opacity(0.65)]
+                            : [FTColors.negative,  FTColors.negative.opacity(0.65)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
                 .contentTransition(.numericText())
                 .accessibilityLabel("Available balance \(totalBalance.currencyFormatted)")
         }

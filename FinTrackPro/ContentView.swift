@@ -69,7 +69,8 @@ struct ContentView: View {
                     .frame(width: 56, height: 56)
                     .background(FTColors.positive)
                     .clipShape(Circle())
-                    .shadow(color: FTColors.positive.opacity(0.35), radius: 14, x: 0, y: 6)
+                    .shadow(color: FTColors.positive.opacity(0.55), radius: 8,  x: 0, y: 4)
+                    .shadow(color: FTColors.positive.opacity(0.20), radius: 24, x: 0, y: 10)
             }
             .buttonStyle(FABStyle())
             .accessibilityLabel("Add transaction")
