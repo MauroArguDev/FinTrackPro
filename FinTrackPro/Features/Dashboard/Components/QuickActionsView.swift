@@ -29,7 +29,11 @@ struct QuickActionsView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, FTSpacing.md)
-            .ftCard()
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: FTRadius.lg))
+            .overlay {
+                RoundedRectangle(cornerRadius: FTRadius.lg)
+                    .strokeBorder(FTColors.border, lineWidth: 0.5)
+            }
         }
         .buttonStyle(QuickActionStyle())
         .accessibilityLabel(label)
@@ -41,9 +45,9 @@ private struct QuickActionStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .opacity(configuration.isPressed ? 0.7 : 1)
+            .opacity(configuration.isPressed ? 0.75 : 1)
             .scaleEffect(configuration.isPressed && !reduceMotion ? 0.97 : 1)
-            .animation(reduceMotion ? .none : .easeInOut(duration: 0.12), value: configuration.isPressed)
+            .animation(reduceMotion ? .none : .spring(response: 0.3, dampingFraction: 0.65), value: configuration.isPressed)
     }
 }
 
