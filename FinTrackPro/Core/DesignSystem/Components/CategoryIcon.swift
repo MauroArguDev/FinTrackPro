@@ -9,7 +9,7 @@ struct CategoryIcon: View {
             .font(.system(size: 16))
             .frame(width: 32, height: 32)
             .background(color.opacity(0.15))
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .clipShape(RoundedRectangle(cornerRadius: FTRadius.md))
     }
 }
 

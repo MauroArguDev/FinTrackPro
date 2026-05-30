@@ -4,17 +4,9 @@ struct AmountText: View {
     let amount: Double
     var font: Font = FTTypo.data()
 
-    private static let formatter: NumberFormatter = {
-        let f = NumberFormatter()
-        f.numberStyle = .decimal
-        f.minimumFractionDigits = 2
-        f.maximumFractionDigits = 2
-        return f
-    }()
-
     private var formatted: String {
-        let value = Self.formatter.string(from: NSNumber(value: abs(amount))) ?? "0.00"
-        return amount >= 0 ? "+$\(value)" : "−$\(value)"
+        let value = abs(amount).absoluteCurrencyFormatted
+        return amount >= 0 ? "+\(value)" : "−\(value)"
     }
 
     var body: some View {

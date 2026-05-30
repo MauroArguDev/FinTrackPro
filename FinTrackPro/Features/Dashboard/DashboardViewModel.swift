@@ -10,14 +10,7 @@ final class DashboardViewModel {
     private(set) var recentTransactions: [Transaction] = []
 
     func update(with transactions: [Transaction]) {
-        guard !transactions.isEmpty else {
-            totalBalance = 0
-            monthlyIncome = 0
-            monthlyExpenses = 0
-            savingsRate = 0
-            recentTransactions = []
-            return
-        }
+        guard !transactions.isEmpty else { reset(); return }
 
         let comps = Calendar.current.dateComponents([.year, .month], from: .now)
         let monthStart = Calendar.current.date(from: comps) ?? .now
@@ -37,5 +30,13 @@ final class DashboardViewModel {
         monthlyExpenses = expenses
         savingsRate = income > 0 ? max(0, min(1, (income - expenses) / income)) : 0
         recentTransactions = Array(transactions.prefix(5))
+    }
+
+    private func reset() {
+        totalBalance = 0
+        monthlyIncome = 0
+        monthlyExpenses = 0
+        savingsRate = 0
+        recentTransactions = []
     }
 }

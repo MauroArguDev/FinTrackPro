@@ -35,10 +35,10 @@ struct RecentTransactionsView: View {
 
     private var transactionsList: some View {
         VStack(spacing: 0) {
-            ForEach(Array(transactions.enumerated()), id: \.element.id) { index, transaction in
+            ForEach(transactions, id: \.id) { transaction in
                 TransactionRowView(transaction: transaction)
                     .padding(.horizontal, FTSpacing.md)
-                if index < transactions.count - 1 {
+                if transaction.id != transactions.last?.id {
                     Rectangle()
                         .fill(FTColors.border)
                         .frame(height: 0.5)

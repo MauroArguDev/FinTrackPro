@@ -29,7 +29,7 @@ struct BalanceCardView: View {
                 .font(FTTypo.amountLg())
                 .foregroundStyle(totalBalance >= 0 ? FTColors.positive : FTColors.negative)
                 .contentTransition(.numericText())
-                .accessibilityLabel("Available balance \(totalBalance.absoluteCurrencyFormatted)")
+                .accessibilityLabel("Available balance \(totalBalance.currencyFormatted)")
         }
     }
 
@@ -50,9 +50,14 @@ struct BalanceCardView: View {
             .accessibilityHidden(true)
     }
 
+    private enum SavingsThreshold {
+        static let healthy: Double = 0.20
+        static let minimal: Double = 0.05
+    }
+
     private var savingsColor: Color {
-        if savingsRate >= 0.2 { return FTColors.positive }
-        if savingsRate >= 0.05 { return FTColors.warning }
+        if savingsRate >= SavingsThreshold.healthy { return FTColors.positive }
+        if savingsRate >= SavingsThreshold.minimal { return FTColors.warning }
         return FTColors.negative
     }
 }
