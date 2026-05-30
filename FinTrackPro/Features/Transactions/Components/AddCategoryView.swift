@@ -12,6 +12,7 @@ struct AddCategoryView: View {
     @State private var emoji = ""
     @State private var selectedColorHex = "#00D68F"
     @State private var didAttemptSave = false
+    @State private var showSaveError = false
     @FocusState private var nameFocused: Bool
 
     private let presetColors: [(hex: String, label: String)] = [
@@ -64,6 +65,11 @@ struct AddCategoryView: View {
         .onAppear { nameFocused = true }
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
+        .alert("Save Failed", isPresented: $showSaveError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Could not save the category. Please try again.")
+        }
     }
 
     // MARK: - Preview
@@ -282,6 +288,7 @@ struct AddCategoryView: View {
             onCreated?(category)
             dismiss()
         } catch {
+            showSaveError = true
             UINotificationFeedbackGenerator().notificationOccurred(.error)
         }
     }

@@ -1,4 +1,4 @@
-import CoreFoundation
+import Foundation
 
 enum FTRadius {
     static let sm:   CGFloat = 8

@@ -25,6 +25,7 @@ struct TransactionRowView: View {
             AmountText(amount: transaction.signedAmount)
         }
         .padding(.vertical, FTSpacing.sm)
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(transaction.title), \(transaction.date.transactionLabel), \(transaction.isIncome ? "income" : "expense") \(transaction.amount.absoluteCurrencyFormatted)")
     }
 }

@@ -1,4 +1,4 @@
-import CoreFoundation
+import Foundation
 
 enum FTSpacing {
     static let xs:   CGFloat = 4

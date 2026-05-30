@@ -21,7 +21,13 @@ struct FinTrackProApp: App {
                     let count = (try? context.fetchCount(FetchDescriptor<Category>())) ?? 0
                     guard count == 0 else { return }
                     Category.defaults().forEach { context.insert($0) }
-                    try? context.save()
+                    do {
+                        try context.save()
+                    } catch {
+                        #if DEBUG
+                        print("FinTrackPro: seed data save failed — \(error)")
+                        #endif
+                    }
                 }
         }
         .modelContainer(sharedModelContainer)
