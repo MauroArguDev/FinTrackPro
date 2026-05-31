@@ -3,6 +3,9 @@ import SwiftData
 
 @main
 struct FinTrackProApp: App {
+    @State private var appState = AppState()
+    @Environment(\.scenePhase) private var scenePhase
+
     let sharedModelContainer: ModelContainer = {
         let schema = Schema([Transaction.self, Category.self, Budget.self])
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
@@ -16,6 +19,7 @@ struct FinTrackProApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(appState)
                 .task {
                     let context = sharedModelContainer.mainContext
                     let count = (try? context.fetchCount(FetchDescriptor<Category>())) ?? 0
@@ -27,6 +31,11 @@ struct FinTrackProApp: App {
                         #if DEBUG
                         print("FinTrackPro: seed data save failed — \(error)")
                         #endif
+                    }
+                }
+                .onChange(of: scenePhase) { _, phase in
+                    if phase == .background, appState.biometricEnabled {
+                        appState.lock()
                     }
                 }
         }
