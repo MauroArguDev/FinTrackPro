@@ -74,7 +74,7 @@ struct ContentView: View {
             }
             .buttonStyle(FABStyle())
             .accessibilityLabel("Add transaction")
-            .padding(.bottom, 96)
+            .padding(.bottom, 62)
         }
         .sheet(item: $transactionIntent) { intent in
             AddTransactionView(isIncome: intent.isIncome)

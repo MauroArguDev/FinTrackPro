@@ -23,6 +23,7 @@ struct EditBudgetView: View {
                     .padding(.top, FTSpacing.lg)
                     .padding(.bottom, FTSpacing.xxxl)
                 }
+                .scrollIndicators(.hidden)
             }
             .navigationTitle("Edit Budgets")
             .navigationBarTitleDisplayMode(.inline)
