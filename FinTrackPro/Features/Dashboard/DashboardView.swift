@@ -30,6 +30,7 @@ struct DashboardView: View {
                 .padding(.top, FTSpacing.lg)
                 .padding(.bottom, FTSpacing.xxxl)
             }
+            .scrollIndicators(.hidden)
             .background(FTColors.background)
             .navigationTitle("FinTrack Pro")
             .navigationBarTitleDisplayMode(.inline)

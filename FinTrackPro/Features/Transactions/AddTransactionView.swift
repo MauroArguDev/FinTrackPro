@@ -34,6 +34,7 @@ struct AddTransactionView: View {
                     .padding(.top, FTSpacing.lg)
                     .padding(.bottom, FTSpacing.xxxl)
                 }
+                .scrollIndicators(.hidden)
             }
             .navigationTitle(viewModel.isIncome ? "Add Income" : "Add Expense")
             .navigationBarTitleDisplayMode(.inline)

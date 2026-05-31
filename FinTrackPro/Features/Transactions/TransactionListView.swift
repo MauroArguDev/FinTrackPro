@@ -81,6 +81,7 @@ struct TransactionListView: View {
         }
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
+        .scrollIndicators(.hidden)
     }
 
     private func emptyState(icon: String, message: String) -> some View {

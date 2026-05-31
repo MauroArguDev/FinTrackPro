@@ -57,6 +57,7 @@ struct AddCategoryView: View {
                     .padding(.top, FTSpacing.lg)
                     .padding(.bottom, FTSpacing.xxxl)
                 }
+                .scrollIndicators(.hidden)
             }
             .navigationTitle("New Category")
             .navigationBarTitleDisplayMode(.inline)

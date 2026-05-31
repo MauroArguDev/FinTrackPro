@@ -49,6 +49,7 @@ struct BudgetView: View {
                 .padding(.top, FTSpacing.lg)
                 .padding(.bottom, FTSpacing.xxxl)
             }
+            .scrollIndicators(.hidden)
         }
     }
 
