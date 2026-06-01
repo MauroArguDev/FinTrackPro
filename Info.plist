@@ -35,6 +35,8 @@
 	</array>
 	<key>NSFaceIDUsageDescription</key>
 	<string>FinTrack Pro uses Face ID to protect your financial data.</string>
+	<key>NSSiriUsageDescription</key>
+	<string>FinTrack Pro uses Siri so you can add expenses and check your balance hands-free.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Syne-Regular.ttf</string>

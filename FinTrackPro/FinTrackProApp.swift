@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import AppIntents
 
 @main
 struct FinTrackProApp: App {
@@ -27,6 +28,7 @@ struct FinTrackProApp: App {
             ContentView()
                 .environment(appState)
                 .task {
+                    FinTrackAppShortcuts.updateAppShortcutParameters()
                     let context = sharedModelContainer.mainContext
                     let count = (try? context.fetchCount(FetchDescriptor<Category>())) ?? 0
                     guard count == 0 else { return }

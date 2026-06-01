@@ -5,6 +5,40 @@
       "comment" : "Siri phrase to add an expense",
       "extractionState" : "manual"
     },
+    "Add expense in ${applicationName}" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringSet" : {
+            "state" : "new",
+            "values" : [
+              "Add expense in ${applicationName}",
+              "Log a purchase in ${applicationName}",
+              "Record expense in ${applicationName}"
+            ]
+          }
+        }
+      }
+    },
+    "Check my balance in $(AppName)" : {
+      "comment" : "Siri phrase to check current balance",
+      "extractionState" : "manual"
+    },
+    "Check my balance in ${applicationName}" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringSet" : {
+            "state" : "new",
+            "values" : [
+              "Check my balance in ${applicationName}",
+              "What's my balance in ${applicationName}",
+              "Show balance in ${applicationName}"
+            ]
+          }
+        }
+      }
+    },
     "Log a purchase in $(AppName)" : {
       "comment" : "Siri phrase to log a purchase",
       "extractionState" : "manual"
@@ -13,16 +47,12 @@
       "comment" : "Siri phrase to record an expense",
       "extractionState" : "manual"
     },
-    "Check my balance in $(AppName)" : {
-      "comment" : "Siri phrase to check current balance",
+    "Show balance in $(AppName)" : {
+      "comment" : "Siri phrase to show balance",
       "extractionState" : "manual"
     },
     "What's my balance in $(AppName)" : {
       "comment" : "Siri phrase to query current balance",
-      "extractionState" : "manual"
-    },
-    "Show balance in $(AppName)" : {
-      "comment" : "Siri phrase to show balance",
       "extractionState" : "manual"
     }
   },
