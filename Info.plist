@@ -33,6 +33,8 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
+	<key>NSFaceIDUsageDescription</key>
+	<string>FinTrack Pro uses Face ID to protect your financial data.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Syne-Regular.ttf</string>

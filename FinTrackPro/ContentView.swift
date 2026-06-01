@@ -18,8 +18,13 @@ private struct FABStyle: ButtonStyle {
 }
 
 struct ContentView: View {
+    @Environment(AppState.self) private var appState
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     @State private var selectedTab: AppTab = .dashboard
     @State private var transactionIntent: TransactionIntent?
+    @State private var showBiometricOnboarding = false
 
     init() {
         let tab = UITabBarAppearance()
@@ -39,6 +44,47 @@ struct ContentView: View {
     }
 
     var body: some View {
+        ZStack {
+            mainContent
+
+            if scenePhase != .active && appState.isUnlocked {
+                privacyOverlay
+                    .transition(.opacity)
+                    .animation(.none, value: scenePhase)
+            }
+
+            if appState.biometricEnabled && !appState.isUnlocked {
+                LockScreenView()
+                    .transition(.opacity)
+                    .animation(
+                        reduceMotion ? .none : .easeInOut(duration: 0.25),
+                        value: appState.isUnlocked
+                    )
+            }
+        }
+        .task {
+            guard !appState.hasShownBiometricPrompt, appState.canUseBiometrics else { return }
+            showBiometricOnboarding = true
+        }
+        .alert("Protect with \(appState.biometricName)?", isPresented: $showBiometricOnboarding) {
+            Button("Enable \(appState.biometricName)") {
+                appState.hasShownBiometricPrompt = true
+                appState.biometricEnabled = true
+                appState.lock()
+            }
+            Button("Not Now", role: .cancel) {
+                appState.hasShownBiometricPrompt = true
+                appState.biometricEnabled = false
+            }
+        } message: {
+            Text(
+                "FinTrack Pro can use \(appState.biometricName) to keep your financial data private. You can change this anytime in Settings."
+            )
+        }
+    }
+
+    @ViewBuilder
+    private var mainContent: some View {
         ZStack(alignment: .bottom) {
             TabView(selection: $selectedTab) {
                 DashboardView(selectedTab: $selectedTab)
@@ -79,5 +125,22 @@ struct ContentView: View {
         .sheet(item: $transactionIntent) { intent in
             AddTransactionView(isIncome: intent.isIncome)
         }
+    }
+
+    @ViewBuilder
+    private var privacyOverlay: some View {
+        FTColors.background
+            .ignoresSafeArea()
+            .overlay {
+                VStack(spacing: FTSpacing.lg) {
+                    Image(systemName: "lock.shield.fill")
+                        .font(.system(size: 48, weight: .medium))
+                        .foregroundStyle(FTColors.positive)
+                        .accessibilityHidden(true)
+                    Text("FinTrack Pro")
+                        .font(FTTypo.h2())
+                        .foregroundStyle(FTColors.textPrimary)
+                }
+            }
     }
 }
