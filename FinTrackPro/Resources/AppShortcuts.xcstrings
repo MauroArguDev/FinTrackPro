@@ -1,0 +1,30 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Add expense in $(AppName)" : {
+      "comment" : "Siri phrase to add an expense",
+      "extractionState" : "manual"
+    },
+    "Log a purchase in $(AppName)" : {
+      "comment" : "Siri phrase to log a purchase",
+      "extractionState" : "manual"
+    },
+    "Record expense in $(AppName)" : {
+      "comment" : "Siri phrase to record an expense",
+      "extractionState" : "manual"
+    },
+    "Check my balance in $(AppName)" : {
+      "comment" : "Siri phrase to check current balance",
+      "extractionState" : "manual"
+    },
+    "What's my balance in $(AppName)" : {
+      "comment" : "Siri phrase to query current balance",
+      "extractionState" : "manual"
+    },
+    "Show balance in $(AppName)" : {
+      "comment" : "Siri phrase to show balance",
+      "extractionState" : "manual"
+    }
+  },
+  "version" : "1.0"
+}
