@@ -123,28 +123,6 @@ struct SettingsView: View {
 
     private var dataSection: some View {
         section("DATA") {
-            VStack(spacing: FTSpacing.sm) {
-                row {
-                    Label("iCloud Sync", systemImage: "icloud")
-                        .font(FTTypo.body())
-                        .foregroundStyle(FTColors.textPrimary)
-                    Spacer()
-                    Toggle("", isOn: $viewModel.iCloudSyncEnabled)
-                        .tint(FTColors.positive)
-                        .accessibilityLabel("Enable iCloud Sync")
-                }
-
-                if viewModel.iCloudSyncEnabled {
-                    Text("Changes take effect after restarting the app.")
-                        .font(FTTypo.caption())
-                        .foregroundStyle(FTColors.textDisabled)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, FTSpacing.xs)
-                        .transition(.opacity)
-                }
-            }
-            .animation(.easeInOut(duration: 0.2), value: viewModel.iCloudSyncEnabled)
-
             ShareLink(item: csvFileURL, preview: SharePreview("FinTrackPro_Transactions.csv")) {
                 actionRow(label: "Export Transactions", icon: "arrow.up.doc", color: FTColors.accent)
             }

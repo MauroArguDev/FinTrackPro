@@ -5,13 +5,6 @@ import SwiftData
 @MainActor
 final class SettingsViewModel {
 
-    private static let iCloudKey = "ft.iCloudSync"
-
-    var iCloudSyncEnabled: Bool {
-        get { UserDefaults.standard.bool(forKey: Self.iCloudKey) }
-        set { UserDefaults.standard.set(newValue, forKey: Self.iCloudKey) }
-    }
-
     let currencies: [(code: String, label: String)] = [
         ("USD", "US Dollar"),
         ("CAD", "Canadian Dollar"),
