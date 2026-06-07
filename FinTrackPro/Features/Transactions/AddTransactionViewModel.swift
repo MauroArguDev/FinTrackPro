@@ -10,9 +10,22 @@ final class AddTransactionViewModel {
     var selectedCategory: Category?
     var isIncome: Bool
     var date: Date = .now
+    private(set) var isEditing = false
+    private var editingTransaction: Transaction?
 
     init(isIncome: Bool = false) {
         self.isIncome = isIncome
+    }
+
+    init(editing transaction: Transaction) {
+        self.isIncome = transaction.isIncome
+        self.amountCents = Int((transaction.amount * 100).rounded())
+        self.title = transaction.title
+        self.note = transaction.note ?? ""
+        self.date = transaction.date
+        self.selectedCategory = transaction.category
+        self.editingTransaction = transaction
+        self.isEditing = true
     }
 
     var displayAmount: String {
@@ -37,20 +50,28 @@ final class AddTransactionViewModel {
             throw FinTrackError.saveFailed(underlying: SaveError.emptyTitle)
         }
 
-        let transaction = Transaction(
-            amount: amount,
-            title: trimmedTitle,
-            note: trimmedNote.isEmpty ? nil : trimmedNote,
-            date: date,
-            isIncome: isIncome,
-            category: selectedCategory
-        )
-        context.insert(transaction)
+        if let existing = editingTransaction {
+            existing.amount   = amount
+            existing.title    = trimmedTitle
+            existing.note     = trimmedNote.isEmpty ? nil : trimmedNote
+            existing.date     = date
+            existing.isIncome = isIncome
+            existing.category = selectedCategory
+        } else {
+            let transaction = Transaction(
+                amount: amount,
+                title: trimmedTitle,
+                note: trimmedNote.isEmpty ? nil : trimmedNote,
+                date: date,
+                isIncome: isIncome,
+                category: selectedCategory
+            )
+            context.insert(transaction)
+        }
 
         do {
             try context.save()
         } catch {
-            context.delete(transaction)
             throw FinTrackError.saveFailed(underlying: error)
         }
     }

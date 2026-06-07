@@ -9,6 +9,7 @@ struct TransactionListView: View {
     @State private var showDeleteAlert = false
     @State private var deleteError: FinTrackError?
     @State private var showDeleteError = false
+    @State private var selectedTransaction: Transaction?
 
     var body: some View {
         NavigationStack {
@@ -31,6 +32,9 @@ struct TransactionListView: View {
         }
         .onChange(of: transactions, initial: true) { _, updated in
             viewModel.update(with: updated)
+        }
+        .sheet(item: $selectedTransaction) { tx in
+            TransactionDetailView(transaction: tx)
         }
     }
 
@@ -58,18 +62,21 @@ struct TransactionListView: View {
             ForEach(viewModel.groupedTransactions, id: \.key) { group in
                 Section {
                     ForEach(group.transactions, id: \.id) { tx in
-                        TransactionRowView(transaction: tx)
-                            .listRowBackground(FTColors.card)
-                            .listRowSeparatorTint(FTColors.border)
-                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                Button {
-                                    pendingDelete = tx
-                                    showDeleteAlert = true
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
-                                }
-                                .tint(FTColors.negative)
+                        Button { selectedTransaction = tx } label: {
+                            TransactionRowView(transaction: tx)
+                        }
+                        .buttonStyle(.plain)
+                        .listRowBackground(FTColors.card)
+                        .listRowSeparatorTint(FTColors.border)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button {
+                                pendingDelete = tx
+                                showDeleteAlert = true
+                            } label: {
+                                Label("Delete", systemImage: "trash")
                             }
+                            .tint(FTColors.negative)
+                        }
                     }
                 } header: {
                     Text(group.key)
