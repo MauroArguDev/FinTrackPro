@@ -4,9 +4,16 @@ struct AmountText: View {
     let amount: Double
     var font: Font = FTTypo.data()
 
+    @Environment(AppState.self) private var appState
+
     private var formatted: String {
-        let value = abs(amount).absoluteCurrencyFormatted
-        return amount >= 0 ? "+\(value)" : "−\(value)"
+        let f = NumberFormatter()
+        f.numberStyle = .currency
+        f.currencyCode = appState.selectedCurrency
+        f.minimumFractionDigits = 2
+        f.maximumFractionDigits = 2
+        let abs = f.string(from: NSNumber(value: Swift.abs(amount))) ?? "0.00"
+        return amount >= 0 ? "+\(abs)" : "−\(abs)"
     }
 
     var body: some View {

@@ -6,6 +6,7 @@ struct DashboardView: View {
     @Query(sort: \Transaction.date, order: .reverse) private var transactions: [Transaction]
     @State private var viewModel = DashboardViewModel()
     @State private var transactionIntent: TransactionIntent?
+    @State private var showSettings = false
 
     var body: some View {
         NavigationStack {
@@ -34,6 +35,18 @@ struct DashboardView: View {
             .background(FTColors.background)
             .navigationTitle("FinTrack Pro")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { showSettings = true } label: {
+                        Image(systemName: "gearshape")
+                            .foregroundStyle(FTColors.textSecondary)
+                    }
+                    .accessibilityLabel("Settings")
+                }
+            }
+            .sheet(isPresented: $showSettings) {
+                SettingsView()
+            }
         }
         .onChange(of: transactions, initial: true) { _, updated in
             viewModel.update(with: updated)
