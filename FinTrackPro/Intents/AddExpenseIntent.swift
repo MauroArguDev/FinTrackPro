@@ -7,14 +7,30 @@ struct AddExpenseIntent: AppIntent {
     static var description = IntentDescription("Log a new expense in FinTrack Pro")
     static var openAppWhenRun: Bool = false
 
-    @Parameter(title: "Amount", description: "Expense amount in dollars")
+    @Parameter(
+        title: "Amount",
+        description: "Expense amount in dollars",
+        requestValueDialog: IntentDialog("How much did you spend?")
+    )
     var amount: Double
 
-    @Parameter(title: "Category", description: "Expense category name", default: "Other")
+    @Parameter(
+        title: "Category",
+        description: "Expense category name",
+        requestValueDialog: IntentDialog("What category is this expense?")
+    )
     var category: String
 
-    @Parameter(title: "Description", description: "What the expense was for")
-    var note: String?
+    @Parameter(
+        title: "Description",
+        description: "What the expense was for",
+        requestValueDialog: IntentDialog("What was this expense for?")
+    )
+    var note: String
+
+    static var parameterSummary: some ParameterSummary {
+        Summary("Add \(\.$amount) for \(\.$note) in \(\.$category)")
+    }
 
     @MainActor
     func perform() async throws -> some ReturnsValue<Double> & ProvidesDialog {
@@ -39,8 +55,7 @@ struct AddExpenseIntent: AppIntent {
         )
         let matched = try? context.fetch(catDescriptor).first
 
-        let txTitle = note ?? category
-        let transaction = Transaction(amount: amount, title: txTitle, isIncome: false, category: matched)
+        let transaction = Transaction(amount: amount, title: note, isIncome: false, category: matched)
         context.insert(transaction)
         try context.save()
 
@@ -58,7 +73,7 @@ struct AddExpenseIntent: AppIntent {
         let formatted = amount.currencyFormatted
         return .result(
             value: amount,
-            dialog: IntentDialog("Added \(formatted) for \(txTitle)")
+            dialog: IntentDialog("Added \(formatted) for \(note)")
         )
     }
 }

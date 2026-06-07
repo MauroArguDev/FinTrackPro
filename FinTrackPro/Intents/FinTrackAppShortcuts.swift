@@ -17,6 +17,7 @@ struct FinTrackAppShortcuts: AppShortcutsProvider {
             phrases: [
                 "Check my balance in \(.applicationName)",
                 "What's my balance in \(.applicationName)",
+                "What's my current balance in \(.applicationName)",
                 "Show balance in \(.applicationName)"
             ],
             shortTitle: "Check Balance",
