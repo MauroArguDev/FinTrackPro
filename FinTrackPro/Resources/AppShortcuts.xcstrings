@@ -1,0 +1,77 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Add expense in ${applicationName}" : {
+      "localizations" : {
+        "en" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Add expense in ${applicationName}",
+              "Log a purchase in ${applicationName}",
+              "Record expense in ${applicationName}"
+            ]
+          }
+        },
+        "es" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Agregar gasto en ${applicationName}",
+              "Registrar una compra en ${applicationName}",
+              "Anotar gasto en ${applicationName}"
+            ]
+          }
+        },
+        "fr" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Ajouter une dépense dans ${applicationName}",
+              "Enregistrer un achat dans ${applicationName}",
+              "Noter une dépense dans ${applicationName}"
+            ]
+          }
+        }
+      }
+    },
+    "Check my balance in ${applicationName}" : {
+      "localizations" : {
+        "en" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Check my balance in ${applicationName}",
+              "What's my balance in ${applicationName}",
+              "What's my current balance in ${applicationName}",
+              "Show balance in ${applicationName}"
+            ]
+          }
+        },
+        "es" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Ver mi saldo en ${applicationName}",
+              "Cuál es mi saldo en ${applicationName}",
+              "Cuál es mi saldo actual en ${applicationName}",
+              "Mostrar saldo en ${applicationName}"
+            ]
+          }
+        },
+        "fr" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "Vérifier mon solde dans ${applicationName}",
+              "Quel est mon solde dans ${applicationName}",
+              "Quel est mon solde actuel dans ${applicationName}",
+              "Afficher le solde dans ${applicationName}"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
