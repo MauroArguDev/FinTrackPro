@@ -4,12 +4,18 @@ import SwiftData
 @main
 struct FinTrackProApp: App {
     @State private var appState = AppState()
-    @Environment(\.scenePhase) private var scenePhase
 
     let sharedModelContainer: ModelContainer = {
         let schema = Schema([Transaction.self, Category.self, Budget.self])
-        let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
         do {
+            if let groupURL = FileManager.default.containerURL(
+                forSecurityApplicationGroupIdentifier: "group.com.argudev.FinTrackPro"
+            ) {
+                let storeURL = groupURL.appendingPathComponent("fintrackpro.store")
+                let config = ModelConfiguration(schema: schema, url: storeURL)
+                return try ModelContainer(for: schema, configurations: [config])
+            }
+            let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
             return try ModelContainer(for: schema, configurations: [config])
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
@@ -31,11 +37,6 @@ struct FinTrackProApp: App {
                         #if DEBUG
                         print("FinTrackPro: seed data save failed — \(error)")
                         #endif
-                    }
-                }
-                .onChange(of: scenePhase) { _, phase in
-                    if phase == .background, appState.biometricEnabled {
-                        appState.lock()
                     }
                 }
         }

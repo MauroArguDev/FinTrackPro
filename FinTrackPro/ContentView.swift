@@ -1,4 +1,6 @@
 import SwiftUI
+import SwiftData
+import WidgetKit
 
 enum AppTab: Hashable {
     case dashboard, transactions, budget, charts
@@ -21,6 +23,8 @@ struct ContentView: View {
     @Environment(AppState.self) private var appState
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    @Query(sort: \Transaction.date, order: .reverse) private var allTransactions: [Transaction]
 
     @State private var selectedTab: AppTab = .dashboard
     @State private var transactionIntent: TransactionIntent?
@@ -62,6 +66,17 @@ struct ContentView: View {
                     )
             }
         }
+        .onChange(of: allTransactions, initial: true) { _, txns in
+            writeWidgetSnapshot(txns)
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                WidgetCenter.shared.reloadAllTimelines()
+            }
+            if phase == .background, appState.biometricEnabled {
+                appState.lock()
+            }
+        }
         .task {
             guard !appState.hasShownBiometricPrompt, appState.canUseBiometrics else { return }
             showBiometricOnboarding = true
@@ -81,6 +96,18 @@ struct ContentView: View {
                 "FinTrack Pro can use \(appState.biometricName) to keep your financial data private. You can change this anytime in Settings."
             )
         }
+    }
+
+    private func writeWidgetSnapshot(_ transactions: [Transaction]) {
+        let comps = Calendar.current.dateComponents([.year, .month], from: .now)
+        let monthStart = Calendar.current.date(from: comps) ?? .now
+        var balance = 0.0, income = 0.0, expenses = 0.0
+        for tx in transactions {
+            balance += tx.signedAmount
+            guard tx.date >= monthStart else { continue }
+            if tx.isIncome { income += tx.amount } else { expenses += tx.amount }
+        }
+        WidgetDataService.write(balance: balance, income: income, expenses: expenses, recent: Array(transactions.prefix(3)))
     }
 
     @ViewBuilder
