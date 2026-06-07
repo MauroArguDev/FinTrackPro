@@ -75,6 +75,7 @@ struct ContentView: View {
             }
             if phase == .background, appState.biometricEnabled {
                 appState.lock()
+                dismissAllPresentedSheets()
             }
         }
         .task {
@@ -96,6 +97,15 @@ struct ContentView: View {
                 "FinTrack Pro can use \(appState.biometricName) to keep your financial data private. You can change this anytime in Settings."
             )
         }
+    }
+
+    private func dismissAllPresentedSheets() {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows)
+            .first(where: \.isKeyWindow)?
+            .rootViewController?
+            .dismiss(animated: false)
     }
 
     private func writeWidgetSnapshot(_ transactions: [Transaction]) {

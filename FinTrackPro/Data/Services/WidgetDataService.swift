@@ -19,6 +19,7 @@ enum WidgetDataService {
     private static let suiteID = "group.com.argudev.FinTrackPro"
     private static let key = "ft.widgetSnapshot"
 
+    @MainActor
     static func write(
         balance: Double,
         income: Double,
@@ -49,10 +50,10 @@ enum WidgetDataService {
         WidgetCenter.shared.reloadAllTimelines()
     }
 
-    static func read() -> WidgetSnapshot? {
+    nonisolated static func read() -> WidgetSnapshot? {
         guard
-            let defaults = UserDefaults(suiteName: suiteID),
-            let data = defaults.data(forKey: key)
+            let defaults = UserDefaults(suiteName: "group.com.argudev.FinTrackPro"),
+            let data = defaults.data(forKey: "ft.widgetSnapshot")
         else { return nil }
         return try? JSONDecoder().decode(WidgetSnapshot.self, from: data)
     }

@@ -6,6 +6,17 @@ struct BalanceCardView: View {
     let monthlyExpenses: Double
     let savingsRate: Double
 
+    @Environment(AppState.self) private var appState
+
+    private func formatted(_ value: Double) -> String {
+        let f = NumberFormatter()
+        f.numberStyle = .currency
+        f.currencyCode = appState.selectedCurrency
+        f.minimumFractionDigits = 2
+        f.maximumFractionDigits = 2
+        return f.string(from: NSNumber(value: Swift.abs(value))) ?? "0.00"
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: FTSpacing.lg) {
             balanceSection
@@ -25,7 +36,7 @@ struct BalanceCardView: View {
                 .font(FTTypo.caption())
                 .foregroundStyle(FTColors.textSecondary)
                 .kerning(0.5)
-            Text(totalBalance.currencyFormatted)
+            Text(formatted(totalBalance))
                 .font(FTTypo.amountLg())
                 .foregroundStyle(
                     LinearGradient(
@@ -37,15 +48,15 @@ struct BalanceCardView: View {
                     )
                 )
                 .contentTransition(.numericText())
-                .accessibilityLabel("Available balance \(totalBalance.currencyFormatted)")
+                .accessibilityLabel("Available balance \(formatted(totalBalance))")
         }
     }
 
     private var statsRow: some View {
         HStack(spacing: 0) {
-            StatItem(title: "Income", value: monthlyIncome.absoluteCurrencyFormatted, color: FTColors.positive)
+            StatItem(title: "Income", value: formatted(monthlyIncome), color: FTColors.positive)
             verticalDivider
-            StatItem(title: "Expenses", value: monthlyExpenses.absoluteCurrencyFormatted, color: FTColors.negative)
+            StatItem(title: "Expenses", value: formatted(monthlyExpenses), color: FTColors.negative)
             verticalDivider
             StatItem(title: "Saved", value: savingsRate.percentFormatted, color: savingsColor)
         }

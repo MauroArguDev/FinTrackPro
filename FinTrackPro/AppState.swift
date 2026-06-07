@@ -7,9 +7,13 @@ import Observation
 final class AppState {
     private(set) var isUnlocked: Bool
     private(set) var biometryType: LABiometryType
+    var selectedCurrency: String {
+        didSet { UserDefaults.standard.set(selectedCurrency, forKey: Self.currencyKey) }
+    }
 
     private static let biometricKey   = "ft.biometricEnabled"
     private static let promptShownKey = "ft.biometricPromptShown"
+    private static let currencyKey    = "ft.currency"
 
     var biometricEnabled: Bool {
         get { UserDefaults.standard.bool(forKey: Self.biometricKey) }
@@ -40,6 +44,7 @@ final class AppState {
 
     init() {
         isUnlocked = !UserDefaults.standard.bool(forKey: Self.biometricKey)
+        selectedCurrency = UserDefaults.standard.string(forKey: Self.currencyKey) ?? "USD"
         let ctx = LAContext()
         _ = ctx.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil)
         biometryType = ctx.biometryType

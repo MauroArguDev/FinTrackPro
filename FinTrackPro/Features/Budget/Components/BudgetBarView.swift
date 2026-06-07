@@ -3,6 +3,16 @@ import SwiftUI
 struct BudgetBarView: View {
     let usage: CategoryUsage
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(AppState.self) private var appState
+
+    private func formatted(_ value: Double) -> String {
+        let f = NumberFormatter()
+        f.numberStyle = .currency
+        f.currencyCode = appState.selectedCurrency
+        f.minimumFractionDigits = 2
+        f.maximumFractionDigits = 2
+        return f.string(from: NSNumber(value: Swift.abs(value))) ?? "0.00"
+    }
 
     private var categoryColor: Color {
         Color(hexString: usage.category.colorHex) ?? FTColors.accent
@@ -23,7 +33,7 @@ struct BudgetBarView: View {
                     Text(usage.category.name)
                         .font(FTTypo.bodySemi())
                         .foregroundStyle(FTColors.textPrimary)
-                    Text("\(usage.spent.absoluteCurrencyFormatted) of \(usage.budget.limit.absoluteCurrencyFormatted)")
+                    Text("\(formatted(usage.spent)) of \(formatted(usage.budget.limit))")
                         .font(FTTypo.caption())
                         .foregroundStyle(FTColors.textSecondary)
                 }
@@ -33,7 +43,7 @@ struct BudgetBarView: View {
                 if usage.isOverBudget {
                     PillBadge(label: "Over budget", color: FTColors.negative)
                 } else {
-                    Text("\(usage.remaining.absoluteCurrencyFormatted) left")
+                    Text("\(formatted(usage.remaining)) left")
                         .font(FTTypo.caption())
                         .foregroundStyle(FTColors.textSecondary)
                 }
@@ -65,6 +75,6 @@ struct BudgetBarView: View {
         .padding(FTSpacing.lg)
         .ftCard()
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(usage.category.name), spent \(usage.spent.absoluteCurrencyFormatted) of \(usage.budget.limit.absoluteCurrencyFormatted)")
+        .accessibilityLabel("\(usage.category.name), spent \(formatted(usage.spent)) of \(formatted(usage.budget.limit))")
     }
 }
