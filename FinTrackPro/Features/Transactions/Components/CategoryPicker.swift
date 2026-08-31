@@ -24,6 +24,7 @@ struct CategoryPicker: View {
         let tileColor = Color(hexString: category.colorHex) ?? FTColors.accent
 
         return Button {
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
             selected = isSelected ? nil : category
         } label: {
             VStack(spacing: FTSpacing.xs) {

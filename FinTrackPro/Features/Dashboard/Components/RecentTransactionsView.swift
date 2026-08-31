@@ -3,11 +3,15 @@ import SwiftUI
 struct RecentTransactionsView: View {
     let transactions: [Transaction]
     let onSeeAll: () -> Void
+    @State private var selectedTransaction: Transaction?
 
     var body: some View {
         VStack(spacing: FTSpacing.md) {
             header
             content
+        }
+        .sheet(item: $selectedTransaction) { tx in
+            TransactionDetailView(transaction: tx)
         }
     }
 
@@ -36,8 +40,11 @@ struct RecentTransactionsView: View {
     private var transactionsList: some View {
         VStack(spacing: 0) {
             ForEach(transactions, id: \.id) { transaction in
-                TransactionRowView(transaction: transaction)
-                    .padding(.horizontal, FTSpacing.md)
+                Button { selectedTransaction = transaction } label: {
+                    TransactionRowView(transaction: transaction)
+                        .padding(.horizontal, FTSpacing.md)
+                }
+                .buttonStyle(.plain)
                 if transaction.id != transactions.last?.id {
                     Rectangle()
                         .fill(FTColors.border)

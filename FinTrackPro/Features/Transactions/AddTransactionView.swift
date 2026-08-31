@@ -20,6 +20,12 @@ struct AddTransactionView: View {
         _viewModel = State(wrappedValue: AddTransactionViewModel(isIncome: isIncome))
     }
 
+    init(editing transaction: Transaction) {
+        let vm = AddTransactionViewModel(editing: transaction)
+        _viewModel = State(wrappedValue: vm)
+        _rawDigits = State(wrappedValue: String(vm.amountCents))
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -36,7 +42,7 @@ struct AddTransactionView: View {
                 }
                 .scrollIndicators(.hidden)
             }
-            .navigationTitle(viewModel.isIncome ? "Add Income" : "Add Expense")
+            .navigationTitle(viewModel.isEditing ? "Edit Transaction" : (viewModel.isIncome ? "Add Income" : "Add Expense"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbarContent }
             .alert("Error", isPresented: $showError, presenting: ftError) { _ in
@@ -46,7 +52,7 @@ struct AddTransactionView: View {
             }
         }
         .onAppear {
-            amountFocused = true
+            if !viewModel.isEditing { amountFocused = true }
             applySegmentedStyle()
         }
         .onChange(of: rawDigits) { _, new in

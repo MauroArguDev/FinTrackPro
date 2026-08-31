@@ -33,6 +33,10 @@ struct BudgetView: View {
         .onChange(of: budgets) { _, b in
             viewModel.update(transactions: transactions, budgets: b)
         }
+        .onChange(of: viewModel.overBudgetCategories.count) { old, new in
+            guard new > old else { return }
+            UINotificationFeedbackGenerator().notificationOccurred(.warning)
+        }
     }
 
     @ViewBuilder
